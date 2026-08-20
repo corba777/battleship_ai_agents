@@ -61,6 +61,8 @@ export function wsUrlFromPage(): string | null {
     "model_right",
     "provider_left",
     "provider_right",
+    "adk_left",
+    "adk_right",
     "room",
     "seat",
   ]) {

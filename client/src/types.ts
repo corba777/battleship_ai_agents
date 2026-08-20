@@ -11,6 +11,7 @@ export interface PlayerMeta {
   persona?: string;
   speech?: string;
   provider?: string;
+  adk?: boolean;
 }
 
 export interface ShipPlacement {

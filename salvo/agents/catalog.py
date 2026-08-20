@@ -45,6 +45,7 @@ KIND_ALIASES = {
     "ollama": "ollama",
 }
 PROVIDERS = ("vertex", "gemini", "anthropic", "openai", "ollama")
+ADK_PROVIDERS = ("vertex", "openai", "anthropic")
 
 _GEMINI_ALIASES = {
     "gemini": DEFAULT_GEMINI_MODEL,
@@ -292,6 +293,30 @@ def pick_provider(kind: str, provider: str | None = None, model: str | None = No
     if raw == "vertex" and kind in ("openai", "ollama"):
         raise ValueError(f"{kind} models are not on Vertex in this project")
     return raw
+
+
+def parse_adk(value: object) -> bool | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    raw = str(value).strip().lower()
+    if not raw:
+        return None
+    if raw in ("1", "true", "on", "yes", "adk"):
+        return True
+    if raw in ("0", "false", "off", "no", "direct"):
+        return False
+    raise ValueError(f"unknown adk: {value}")
+
+
+def pick_adk(provider: str, requested: bool | None = None) -> bool:
+    if provider not in ADK_PROVIDERS:
+        return False
+    if requested is not None:
+        return requested
+    raw = (os.environ.get("SALVO_ADK") or "0").strip().lower()
+    return raw in ("1", "true", "on", "yes", "adk")
 
 
 def provider_status() -> dict[str, dict[str, Any]]:

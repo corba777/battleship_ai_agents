@@ -28,8 +28,9 @@ salvo/              # Python package
     match.py        # turn loop, match state machine
     events.py       # event dataclasses -> JSON
     log.py          # JSONL match recorder
-  agents/           # ADK orchestration.
-    player.py       # LlmAgent wrapper, one instance per side
+  agents/
+    player.py       # LlmPlayer, one instance per side
+    adk.py          # Optional Plan-ReAct for Vertex, OpenAI, Anthropic API. No tools. Not Ollama.
     human.py        # click-driven player; same act() contract
     contract.py     # output schema + parsing + repair policy
     prompts/        # system prompts, one file per persona
@@ -150,10 +151,18 @@ may use the same persona.
 ### Models and providers
 
 Setup is provider-first. **Vertex AI** lists Gemini plus Vertex-hosted Claude
-(`claude-opus-4-6`). **Anthropic** is a separate list (`claude-sonnet-5`,
-`claude-opus-5`) and needs `ANTHROPIC_API_KEY`. **OpenAI** defaults to
-`gpt-5.4-nano` (`OPENAI_API_KEY`). **Gemini API** is Google AI Studio
-(`GEMINI_API_KEY`). **Ollama** is local (`OLLAMA_URL`, default
+(`claude-opus-4-6`). Default runtime is **direct**. Per slot, **ADK** is
+optional for Vertex, OpenAI, and Anthropic API: setup overlay DIRECT | ADK,
+live query `adk_left` / `adk_right` (`1` or `0`), CLI `--adk-left` /
+`--no-adk-left`, or env `SALVO_ADK=1` when the slot does not set a flag. ADK
+is a one-shot `LlmAgent` with Plan-ReAct and **no tools** — the referee still
+owns the turn, parse, and repair. Planning tags never enter the opponent
+observation; only `/*FINAL_ANSWER*/` JSON is parsed. Anthropic API uses
+`AnthropicLlm` (not a bare `claude-*` string, which ADK would send to Vertex).
+OpenAI uses `OpenAILlm`. **Ollama and Gemini API stay direct.** **Anthropic**
+list (`claude-sonnet-5`, `claude-opus-5`) needs `ANTHROPIC_API_KEY`. **OpenAI**
+defaults to `gpt-5.4-nano` (`OPENAI_API_KEY`). **Gemini API** is Google AI
+Studio (`GEMINI_API_KEY`). **Ollama** is local (`OLLAMA_URL`, default
 `http://localhost:11434`); same `/api/chat` body as amber (`format: json`,
 `think: false`). `OLLAMA_THINK=1` turns CoT on. `GET /catalog` is the menu
 source. Keys never go to the client.
@@ -270,6 +279,8 @@ uv run python -m salvo.cli replay logs/<match_id>.jsonl --pace 1.5
 # Gemini default: gemini-3.5-flash-lite. Claude/opus default: claude-opus-4-6.
 gcloud auth application-default login
 uv run python -m salvo.cli live --left gemini-3.5-flash --right claude-sonnet-4-6 --seed 1
+# Vertex + ADK Plan-ReAct on the left only:
+# uv run python -m salvo.cli live --left gemini --adk-left --right opus --seed 1
 # API instead of Vertex (needs GEMINI_API_KEY / ANTHROPIC_API_KEY):
 # uv run python -m salvo.cli live --left gemini --provider-left gemini --right opus --provider-right anthropic
 # Ollama (local or LAN; Docker rewrites localhost → host.docker.internal):
@@ -279,6 +290,8 @@ uv run python -m salvo.cli live --left gemini-3.5-flash --right claude-sonnet-4-
 docker compose up --build
 # then open http://localhost:8080/ and pick speech, or
 # http://localhost:8080/?live=1&left=gemini&right=opus&speech_left=raw-ru&speech_right=standard&seed=1
+# Vertex Gemini through ADK, Vertex Claude direct:
+# http://localhost:8080/?live=1&left=gemini&right=opus&adk_left=1&adk_right=0&seed=1
 # Human vs AI (you place your fleet; AI is seeded random):
 # http://localhost:8080/?live=1&left=human&right=gemini-3.5-flash-lite&place_left=manual&seed=1
 # Human vs human (host left; guest opens the URL from the setup overlay):

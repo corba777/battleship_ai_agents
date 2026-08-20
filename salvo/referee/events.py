@@ -16,6 +16,7 @@ class PlayerMeta:
     persona: str | None = None
     speech: str | None = None
     provider: str | None = None
+    adk: bool | None = None
 
     def as_dict(self) -> dict[str, Any]:
         data = {"name": self.name, "kind": self.kind, "model": self.model}
@@ -25,6 +26,8 @@ class PlayerMeta:
             data["speech"] = self.speech
         if self.provider is not None:
             data["provider"] = self.provider
+        if self.adk:
+            data["adk"] = True
         return data
 
 

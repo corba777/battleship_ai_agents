@@ -22,6 +22,8 @@ __all__ = [
     "complete",
     "gemini_model",
     "generate",
+    "generate_vertex_claude",
+    "generate_vertex_gemini",
     "is_claude_model",
     "model_id",
     "project_id",
@@ -103,7 +105,19 @@ def complete(kind: str, system: str, user: str) -> str:
     return routed(kind, system, user)
 
 
-def generate(model: str, system: str, user: str, location: str) -> str:
+def generate(
+    model: str,
+    system: str,
+    user: str,
+    location: str,
+    *,
+    adk: bool = False,
+) -> str:
+    if adk:
+        from salvo.agents.adk import complete as adk_complete
+
+        log.info("vertex adk model=%s location=%s", model, location)
+        return adk_complete(model, system, user, location)
     if is_claude_model(model):
         return generate_vertex_claude(model, system, user, location)
     return generate_vertex_gemini(model, system, user, location)

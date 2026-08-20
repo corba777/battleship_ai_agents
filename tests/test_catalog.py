@@ -6,7 +6,9 @@ from fastapi.testclient import TestClient
 from salvo.agents.catalog import (
     anthropic_models,
     catalog_payload,
+    parse_adk,
     parse_slot,
+    pick_adk,
     pick_provider,
     resolve_model,
     vertex_models,
@@ -77,6 +79,26 @@ def test_provider_defaults_follow_family(monkeypatch) -> None:
         pick_provider("gemini", "anthropic")
     with pytest.raises(ValueError, match="not on Vertex"):
         pick_provider("openai", "vertex")
+
+
+def test_pick_adk_skips_ollama_and_gemini_api(monkeypatch) -> None:
+    monkeypatch.delenv("SALVO_ADK", raising=False)
+    assert parse_adk(None) is None
+    assert parse_adk("1") is True
+    assert parse_adk("direct") is False
+    with pytest.raises(ValueError, match="unknown adk"):
+        parse_adk("maybe")
+    assert pick_adk("vertex") is False
+    assert pick_adk("vertex", True) is True
+    assert pick_adk("openai", True) is True
+    assert pick_adk("anthropic", True) is True
+    assert pick_adk("ollama", True) is False
+    assert pick_adk("gemini", True) is False
+    monkeypatch.setenv("SALVO_ADK", "1")
+    assert pick_adk("vertex") is True
+    assert pick_adk("openai") is True
+    assert pick_adk("ollama") is False
+    assert pick_adk("vertex", False) is False
 
 
 def test_resolve_rejects_cross_family() -> None:

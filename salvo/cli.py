@@ -77,6 +77,18 @@ def _add_match_flags(parser: argparse.ArgumentParser) -> None:
         default=None,
         choices=("vertex", "gemini", "anthropic", "openai", "ollama"),
     )
+    parser.add_argument(
+        "--adk-left",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Vertex, OpenAI, Anthropic API. Plan-ReAct via ADK. Not Ollama or Gemini API. Default: SALVO_ADK env, else direct.",
+    )
+    parser.add_argument(
+        "--adk-right",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Vertex, OpenAI, Anthropic API. Plan-ReAct via ADK. Not Ollama or Gemini API. Default: SALVO_ADK env, else direct.",
+    )
 
 
 def cmd_play(args: argparse.Namespace) -> int:
@@ -90,6 +102,7 @@ def cmd_play(args: argparse.Namespace) -> int:
         speech=args.speech_left,
         model=args.model_left,
         provider=args.provider_left,
+        adk=args.adk_left,
         side="left",
     )
     right = make_player(
@@ -99,6 +112,7 @@ def cmd_play(args: argparse.Namespace) -> int:
         speech=args.speech_right,
         model=args.model_right,
         provider=args.provider_right,
+        adk=args.adk_right,
         side="right",
     )
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
@@ -131,6 +145,14 @@ def cmd_live(args: argparse.Namespace) -> int:
         query["provider_left"] = args.provider_left
     if args.provider_right:
         query["provider_right"] = args.provider_right
+    if args.adk_left is True:
+        query["adk_left"] = "1"
+    elif args.adk_left is False:
+        query["adk_left"] = "0"
+    if args.adk_right is True:
+        query["adk_right"] = "1"
+    elif args.adk_right is False:
+        query["adk_right"] = "0"
     encoded = urlencode(query)
     origin = os.environ.get("SALVO_CLIENT_ORIGIN", "http://localhost:5173")
     print(f"{origin}/?{encoded}")

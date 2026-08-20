@@ -12,7 +12,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from salvo.agents.catalog import catalog_payload
+from salvo.agents.catalog import catalog_payload, parse_adk
 from salvo.agents.factory import make_player
 from salvo.agents.speech import is_speech_profile, pick_speech
 from salvo.referee.board import Board, PlacementError
@@ -69,6 +69,8 @@ async def live(
     model_right: str | None = None,
     provider_left: str | None = None,
     provider_right: str | None = None,
+    adk_left: str | None = None,
+    adk_right: str | None = None,
     room: str | None = None,
     seat: str | None = None,
 ) -> None:
@@ -78,6 +80,12 @@ async def live(
     await ws.accept()
     if not is_speech_profile(speech_left) or not is_speech_profile(speech_right):
         await ws.close(code=1011, reason="unknown speech profile")
+        return
+    try:
+        use_adk_left = parse_adk(adk_left)
+        use_adk_right = parse_adk(adk_right)
+    except ValueError as exc:
+        await ws.close(code=1011, reason=str(exc)[:120])
         return
 
     stop = threading.Event()
@@ -93,6 +101,7 @@ async def live(
             speech=pick_speech(speech_left),
             model=model_left,
             provider=provider_left,
+            adk=use_adk_left,
             side="left",
             inbox=inboxes["left"],
             stop=stop,
@@ -104,6 +113,7 @@ async def live(
             speech=pick_speech(speech_right),
             model=model_right,
             provider=provider_right,
+            adk=use_adk_right,
             side="right",
             inbox=inboxes["right"],
             stop=stop,

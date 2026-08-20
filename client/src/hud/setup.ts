@@ -7,6 +7,9 @@ export type Persona = (typeof PERSONAS)[number];
 export const FLEET_MODES = ["manual", "random"] as const;
 export type FleetMode = (typeof FLEET_MODES)[number];
 
+export const ADK_MODES = ["direct", "adk"] as const;
+export type AdkMode = (typeof ADK_MODES)[number];
+
 type ProviderId =
   | "vertex"
   | "anthropic"
@@ -76,6 +79,7 @@ const FALLBACK: Catalog = {
 };
 
 const LLM_PROVIDERS: ProviderId[] = ["vertex", "anthropic", "openai", "gemini", "ollama"];
+const ADK_PROVIDERS: ProviderId[] = ["vertex", "openai", "anthropic"];
 
 export function attachSetup(onFixture: () => void, startHidden = false): void {
   const root = document.querySelector<HTMLElement>("#setup");
@@ -184,6 +188,12 @@ async function boot(root: HTMLElement, onFixture: () => void): Promise<void> {
     const rightProvider = right.provider();
     if (leftProvider) q.set("provider_left", leftProvider);
     if (rightProvider) q.set("provider_right", rightProvider);
+    if (leftProvider && ADK_PROVIDERS.includes(leftProvider)) {
+      q.set("adk_left", left.adk() === "adk" ? "1" : "0");
+    }
+    if (rightProvider && ADK_PROVIDERS.includes(rightProvider)) {
+      q.set("adk_right", right.adk() === "adk" ? "1" : "0");
+    }
     if (left.providerId() === "human") q.set("place_left", both ? "manual" : left.fleet());
     if (right.providerId() === "human") q.set("place_right", both ? "manual" : right.fleet());
     if (both) {
@@ -235,6 +245,7 @@ function bindSlot(
   const modelSelect = root.querySelector<HTMLSelectElement>(`#setup-${side}-model`);
   const llmBox = root.querySelector<HTMLElement>(`[data-llm="${side}"]`);
   const extras = root.querySelector<HTMLElement>(`[data-extras="${side}"]`);
+  const adkBox = root.querySelector<HTMLElement>(`[data-adk="${side}"]`);
   const placeBox = root.querySelector<HTMLElement>(`[data-place="${side}"]`);
   const initial = parseInitial(
     params.get(side),
@@ -253,6 +264,7 @@ function bindSlot(
     const llm = LLM_PROVIDERS.includes(provider);
     if (llmBox) llmBox.hidden = !llm;
     if (extras) extras.hidden = provider === "human";
+    if (adkBox) adkBox.hidden = !ADK_PROVIDERS.includes(provider);
     if (placeBox) placeBox.hidden = provider !== "human";
     if (!llm) return;
     const family = catalog.providers[provider];
@@ -291,6 +303,12 @@ function bindSlot(
     "fleet",
     params.get(`place_${side}`) === "random" ? "random" : "manual",
   );
+  const adk = bindToggle<AdkMode>(
+    root,
+    side,
+    "adk",
+    params.get(`adk_${side}`) === "1" || params.get(`adk_${side}`) === "adk" ? "adk" : "direct",
+  );
 
   return {
     player: () => {
@@ -304,6 +322,7 @@ function bindSlot(
     speech: speech.get,
     fleet: fleet.get,
     setFleet: fleet.set,
+    adk: adk.get,
     provider: () => {
       const provider = (providerSelect?.value ?? defaultProvider) as ProviderId;
       return LLM_PROVIDERS.includes(provider) ? provider : null;

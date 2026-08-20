@@ -121,10 +121,12 @@ export class Hud {
 
   private fillPlayer(side: Side, player: PlayerMeta): void {
     this.el[side].name.textContent = player.name;
-    this.el[side].model.textContent =
-      player.provider && player.provider !== "vertex"
-        ? `${player.model} · ${player.provider}`
-        : player.model;
+    this.el[side].model.textContent = [
+      player.provider && player.provider !== "vertex" ? `${player.model} · ${player.provider}` : player.model,
+      player.adk ? "adk" : "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
     this.el[side].speech.textContent = player.speech === "raw-ru" ? "ru 16+" : "";
   }
 

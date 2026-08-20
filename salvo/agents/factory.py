@@ -22,6 +22,7 @@ def make_player(
     speech: str | None = None,
     model: str | None = None,
     provider: str | None = None,
+    adk: bool | None = None,
     side: str = "left",
     inbox: queue.Queue[str | None] | None = None,
     stop: object | None = None,
@@ -53,6 +54,7 @@ def make_player(
             speech=pick_speech(speech),
             model=resolved,
             provider="ollama",
+            adk=adk,
         )
     if is_llm_name(name):
         kind, resolved = parse_slot(name, model)
@@ -62,5 +64,6 @@ def make_player(
             speech=pick_speech(speech),
             model=resolved,
             provider=provider,
+            adk=adk,
         )
     raise ValueError(f"unknown player: {name}")

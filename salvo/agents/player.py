@@ -5,7 +5,7 @@ import logging
 from collections.abc import Callable
 from pathlib import Path
 
-from salvo.agents.catalog import pick_provider, resolve_model
+from salvo.agents.catalog import pick_adk, pick_provider, resolve_model
 from salvo.agents.observe import Observation, render_observation
 from salvo.agents.speech import SpeechProfile, compose_system, pick_speech
 from salvo.referee.events import PlayerMeta
@@ -32,11 +32,13 @@ class LlmPlayer:
         speech: str | None = None,
         model: str | None = None,
         provider: str | None = None,
+        adk: bool | None = None,
     ) -> None:
         self.kind = kind
         self.persona = persona
         self.model = resolve_model(kind, model)
         self.provider = pick_provider(kind, provider, model=self.model)
+        self.adk = pick_adk(self.provider, adk)
         self.speech: SpeechProfile = pick_speech(speech)
         self.system = compose_system(load_persona(persona), self.speech)
         self.prompt_hash = hashlib.sha256(self.system.encode()).hexdigest()[:16]
@@ -48,6 +50,7 @@ class LlmPlayer:
             persona=persona,
             speech=self.speech,
             provider=self.provider,
+            adk=self.adk or None,
         )
 
     def act(self, obs: Observation, error: str | None = None) -> str:
@@ -63,6 +66,7 @@ class LlmPlayer:
                 user,
                 model=self.model,
                 provider=self.provider,
+                adk=self.adk,
             )
         except Exception as exc:
             log.exception(

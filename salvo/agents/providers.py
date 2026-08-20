@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import re
 
-from salvo.agents.catalog import pick_provider, resolve_model
+from salvo.agents.catalog import pick_adk, pick_provider, resolve_model
 from salvo.agents.vertex import generate, vertex_location
 
 log = logging.getLogger(__name__)
@@ -16,11 +16,20 @@ def complete(
     *,
     model: str | None = None,
     provider: str | None = None,
+    adk: bool | None = None,
 ) -> str:
     resolved = resolve_model(kind, model)
     route = pick_provider(kind, provider, model=resolved)
+    use_adk = pick_adk(route, adk)
+    if use_adk:
+        from salvo.agents.adk import complete as adk_complete
+
+        location = vertex_location(kind) if route == "vertex" else "global"
+        return adk_complete(
+            resolved, system, user, location, provider=route
+        )
     if route == "vertex":
-        return generate(resolved, system, user, vertex_location(kind))
+        return generate(resolved, system, user, vertex_location(kind), adk=False)
     if route == "gemini":
         return generate_gemini_api(resolved, system, user)
     if route == "openai":
