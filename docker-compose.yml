@@ -1,0 +1,41 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    environment:
+      GOOGLE_CLOUD_PROJECT: example-project
+      GOOGLE_CLOUD_QUOTA_PROJECT: example-project
+      GOOGLE_APPLICATION_CREDENTIALS: /credentials/application_default_credentials.json
+      VERTEX_LOCATION: global
+      SALVO_GEMINI_MODEL: gemini-3.5-flash-lite
+      SALVO_CLAUDE_MODEL: claude-opus-4-6
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+      OLLAMA_MODELS: ${OLLAMA_MODELS:-}
+      OLLAMA_THINK: ${OLLAMA_THINK:-0}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - .env
+    volumes:
+      - ../google_account:/credentials:ro
+      - salvo-logs:/app/logs
+    expose:
+      - "8000"
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+
+volumes:
+  salvo-logs:

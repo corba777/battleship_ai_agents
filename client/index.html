@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>salvo</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23071018'/><text x='8' y='12' text-anchor='middle' font-size='11' fill='%23e2c078'>s</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/hud/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene"></canvas>
+      <div id="hud">
+        <header class="chrome">
+          <span class="mark">salvo</span>
+          <span class="mode" id="mode">spectator</span>
+          <button type="button" class="stop" id="stop" hidden>STOP</button>
+        </header>
+
+        <aside class="panel" id="panel-left" data-side="left">
+          <div class="panel-meta">
+            <span class="side-tag">left</span>
+            <span class="player-name" id="name-left">—</span>
+            <span class="player-model" id="model-left"></span>
+            <span class="player-speech" id="speech-left"></span>
+          </div>
+          <p class="say" id="say-left">waiting for match</p>
+          <div class="tags" id="tags-left"></div>
+        </aside>
+
+        <aside class="panel" id="panel-right" data-side="right">
+          <div class="panel-meta">
+            <span class="side-tag">right</span>
+            <span class="player-name" id="name-right">—</span>
+            <span class="player-model" id="model-right"></span>
+            <span class="player-speech" id="speech-right"></span>
+          </div>
+          <p class="say" id="say-right">waiting for match</p>
+          <div class="tags" id="tags-right"></div>
+        </aside>
+
+        <ul class="counters" id="counters">
+          <li><span class="k">shots</span><span class="v" id="c-shots">0</span></li>
+          <li><span class="k">hit rate</span><span class="v" id="c-hitrate">—</span></li>
+          <li><span class="k">repeats</span><span class="v" id="c-repeats">0</span></li>
+          <li><span class="k">illegals</span><span class="v" id="c-illegals">0</span></li>
+        </ul>
+
+        <div class="toast" id="illegal" hidden></div>
+        <div class="banner" id="banner" hidden></div>
+
+        <div class="setup" id="setup" hidden>
+          <p class="setup-kicker">salvo</p>
+          <h1>set the match</h1>
+          <div class="setup-grid">
+            <section>
+              <h2>left</h2>
+              <label for="setup-left">provider</label>
+              <select id="setup-left">
+                <option value="vertex">Vertex AI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="openai">OpenAI</option>
+                <option value="gemini">Gemini API</option>
+                <option value="ollama">Ollama</option>
+                <option value="human">Human</option>
+                <option value="parity">parity</option>
+                <option value="random">random</option>
+              </select>
+              <div class="setup-llm" data-llm="left">
+                <label for="setup-left-model">model</label>
+                <select id="setup-left-model"></select>
+              </div>
+              <div class="setup-extras" data-extras="left">
+              <p class="setup-label">persona</p>
+              <div class="speech-picks">
+                <button type="button" data-side="left" data-persona="methodical">METHODICAL</button>
+                <button type="button" data-side="left" data-persona="intuitive">INTUITIVE</button>
+              </div>
+              <p class="setup-label">speech</p>
+              <div class="speech-picks">
+                <button type="button" data-side="left" data-speech="standard">STANDARD</button>
+                <button type="button" data-side="left" data-speech="raw-ru">PROFANE RUSSIAN (16+)</button>
+              </div>
+              </div>
+              <div class="setup-place" data-place="left" hidden>
+                <p class="setup-label">your fleet</p>
+                <div class="speech-picks">
+                  <button type="button" data-side="left" data-fleet="manual">MANUAL</button>
+                  <button type="button" data-side="left" data-fleet="random">RANDOM</button>
+                </div>
+              </div>
+            </section>
+            <section>
+              <h2>right</h2>
+              <label for="setup-right">provider</label>
+              <select id="setup-right">
+                <option value="vertex" selected>Vertex AI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="openai">OpenAI</option>
+                <option value="gemini">Gemini API</option>
+                <option value="ollama">Ollama</option>
+                <option value="human">Human</option>
+                <option value="parity">parity</option>
+                <option value="random">random</option>
+              </select>
+              <div class="setup-llm" data-llm="right">
+                <label for="setup-right-model">model</label>
+                <select id="setup-right-model"></select>
+              </div>
+              <div class="setup-extras" data-extras="right">
+              <p class="setup-label">persona</p>
+              <div class="speech-picks">
+                <button type="button" data-side="right" data-persona="methodical">METHODICAL</button>
+                <button type="button" data-side="right" data-persona="intuitive">INTUITIVE</button>
+              </div>
+              <p class="setup-label">speech</p>
+              <div class="speech-picks">
+                <button type="button" data-side="right" data-speech="standard">STANDARD</button>
+                <button type="button" data-side="right" data-speech="raw-ru">PROFANE RUSSIAN (16+)</button>
+              </div>
+              </div>
+              <div class="setup-place" data-place="right" hidden>
+                <p class="setup-label">your fleet</p>
+                <div class="speech-picks">
+                  <button type="button" data-side="right" data-fleet="manual">MANUAL</button>
+                  <button type="button" data-side="right" data-fleet="random">RANDOM</button>
+                </div>
+              </div>
+            </section>
+          </div>
+          <p class="setup-human-hint" id="setup-human-hint" hidden>
+            You place your fleet. The AI board is fogged — hunt by clicking, watch it miss yours.
+          </p>
+          <div class="setup-room" id="setup-room" hidden>
+            <p class="setup-label">guest url · room <span id="setup-room-code">----</span></p>
+            <div class="setup-room-row">
+              <input id="setup-room-url" type="text" readonly />
+              <button type="button" id="setup-room-copy">COPY</button>
+            </div>
+          </div>
+          <label class="setup-seed" for="setup-seed">seed</label>
+          <input id="setup-seed" type="number" value="1" min="0" />
+          <div class="setup-actions">
+            <button type="button" class="setup-go" id="setup-live">WATCH LIVE</button>
+            <button type="button" id="setup-fixture">FIXTURE</button>
+          </div>
+        </div>
+        <div class="place" id="place" hidden>
+          <p class="place-kicker">your fleet</p>
+          <p class="place-status" id="place-status">left · carrier · 5</p>
+          <p class="place-hint" id="place-hint">click bow, then stern</p>
+          <div class="place-actions">
+            <button type="button" id="place-undo">UNDO</button>
+            <button type="button" id="place-random">RANDOM BOARD</button>
+            <button type="button" id="place-cancel">CANCEL</button>
+            <button type="button" class="setup-go" id="place-ready" disabled>READY</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
