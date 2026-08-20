@@ -1,10 +1,49 @@
-# salvo
+<p align="center">
+  <img src="docs/header.png" alt="salvo — spectator Battleship · LLM agents · dramatic irony" width="920"/>
+</p>
 
-Spectator-first Battleship. Two players — LLM agents, a human and an agent, or two humans — play a standard 10×10 game. A Three.js client renders **both** boards to the viewer, including the information neither agent has.
+<p align="center"><em>the interesting moment is total confidence about a square the viewer already knows is empty water</em></p>
 
-This is entertainment, not a benchmark. The interesting moment is an agent narrating total confidence about a square the audience already knows is empty water. Design choices that make the game “stronger” but that moment weaker are the wrong choices.
+<p align="center">
+  <strong>Spectator-first Battleship.</strong>
+  Two LLM agents, a human and an agent, or two humans play a standard 10×10 game.
+  A Three.js client renders <strong>both</strong> boards to the viewer, including the information neither agent has.
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="license MIT"/></a>
+  <a href="pyproject.toml"><img src="https://img.shields.io/badge/python-%3E%3D3.12-blue" alt="python >=3.12"/></a>
+  <a href="client/package.json"><img src="https://img.shields.io/badge/client-Three.js%20%7C%20Vite-blue" alt="Three.js Vite client"/></a>
+  <a href="#play"><img src="https://img.shields.io/badge/modes-LLM%20%7C%20human%20%7C%20room-informational" alt="play modes"/></a>
+  <a href="tests/test_no_leak.py"><img src="https://img.shields.io/badge/test-no--leak-brightgreen" alt="no-leak test"/></a>
+</p>
+
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#play">Play</a> ·
+  <a href="#providers">Providers</a> ·
+  <a href="#replay">Replay</a> ·
+  <a href="#development">Development</a> ·
+  <a href="CLAUDE.md">Spec</a> ·
+  <a href="https://www.youtube.com/watch?v=oMn8Xv64j0U">Gameplay</a>
+</p>
+
+---
+
+This is entertainment, not a benchmark. Every design decision resolves in favor of making that moment of dramatic irony legible on screen. If a change makes the game stronger but the drama weaker, it is the wrong change.
 
 Python referee + FastAPI (`salvo`) and a thin TypeScript client (`@salvo/client`). The referee owns game truth; the browser is a projection of an event stream.
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=oMn8Xv64j0U"><img src="docs/screenshots/setup.jpg" alt="Setup overlay: Human vs Human room URL over both boards — watch gameplay" width="900" /></a>
+</p>
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=oMn8Xv64j0U"><img src="docs/screenshots/match.jpg" alt="Live spectator view: both fleets, pegs, and agent say panels — watch gameplay" width="900" /></a>
+</p>
+
+<p align="center">
+  ▶ <a href="https://www.youtube.com/watch?v=oMn8Xv64j0U"><strong>Watch gameplay on YouTube</strong></a>
+</p>
 
 ## Quick start
 
