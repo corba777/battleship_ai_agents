@@ -71,7 +71,7 @@ Open [http://localhost:5173/](http://localhost:5173/). The Vite proxy forwards `
 Token-free smoke match (bots, no browser):
 
 ```bash
-uv run python -m salvo.cli --left parity --right random --seed 42
+uv run python -m salvo.cli --left occupancy --right random --seed 42
 ```
 
 ## Play
@@ -124,7 +124,7 @@ Keys stay on the server and never go to the client. Copy `.env.example` → `.en
 | **OpenAI** | `OPENAI_API_KEY` | default `gpt-5.4-nano` |
 | **Ollama** | `OLLAMA_URL` (default `http://localhost:11434`) | `format: json`, `think: false`. `OLLAMA_THINK=1` turns CoT on. |
 
-Bots `parity` and `random` implement the same turn contract as LLM players. They are token-free fixtures, not a ranking system.
+Bots `parity`, `occupancy`, and `random` implement the same turn contract as LLM players. They are token-free fixtures, not a ranking system. `occupancy` counts remaining legal ship poses (including no-touch) and fires the densest unfired cell.
 
 ## Replay
 

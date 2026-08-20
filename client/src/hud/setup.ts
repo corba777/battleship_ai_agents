@@ -15,7 +15,8 @@ type ProviderId =
   | "ollama"
   | "human"
   | "parity"
-  | "random";
+  | "random"
+  | "occupancy";
 
 interface ProviderInfo {
   ok: boolean;
@@ -326,7 +327,7 @@ function parseInitial(
   if (!raw || raw === "gemini" || raw === "claude" || raw === "opus") {
     return { provider: fallback };
   }
-  if (raw === "parity" || raw === "random" || raw === "human") return { provider: raw };
+  if (raw === "parity" || raw === "random" || raw === "occupancy" || raw === "human") return { provider: raw };
   if (raw === "openai") return { provider: "openai" };
   if (raw === "ollama") return { provider: "ollama" };
   if (raw.includes(":")) return { provider: "ollama", model: raw };

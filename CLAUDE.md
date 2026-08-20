@@ -235,10 +235,12 @@ a token sink.
 - `test_board.py` — placement legality, shot resolution, sink detection, repeat
   handling. Pure, fast, no LLM.
 - `test_human.py` — `HumanPlayer` inbox, explicit fleets, factory requires inbox.
+- `test_occupancy.py` — occupancy fixture: neighbors after a hit, no reshots, match finishes.
 - `test_room.py` — two-seat human room: both `start`s before `match_start`, seat-taken close.
-- `RandomBot` and `ParityBot` in `agents/bots.py` implement the same contract as
-  LLM players. `HumanPlayer` does too, with clicks instead of inference. They are
-  dev fixtures — do not build ranking or comparison features around them.
+- `RandomBot`, `ParityBot`, and `OccupancyBot` in `agents/bots.py` implement the same contract as
+  LLM players. `HumanPlayer` does too, with clicks instead of inference. `OccupancyBot`
+  (`occupancy`) counts remaining legal poses (no-touch) and fires the densest unfired cell.
+  Dev fixtures — do not build ranking or comparison features around them.
 
 ## Dev workflow
 
@@ -251,7 +253,7 @@ uv run uvicorn salvo.server.app:app --reload
 cd client && npm install && npm run dev
 
 # a bot-vs-bot match, no tokens burned
-uv run python -m salvo.cli --left parity --right random --seed 42
+uv run python -m salvo.cli --left occupancy --right random --seed 42
 
 # replay a recorded match into the browser
 uv run python -m salvo.cli replay logs/<match_id>.jsonl --pace 1.5

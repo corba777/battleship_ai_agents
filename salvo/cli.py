@@ -52,12 +52,12 @@ def _add_match_flags(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--left",
         default="parity",
-        help="parity|random|human|gemini|claude|opus|openai|ollama or a model id",
+        help="parity|random|occupancy|human|gemini|claude|opus|openai|ollama or a model id",
     )
     parser.add_argument(
         "--right",
         default="random",
-        help="parity|random|human|gemini|claude|opus or a model id",
+        help="parity|random|occupancy|human|gemini|claude|opus or a model id",
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--persona-left", default="methodical", choices=PERSONAS)

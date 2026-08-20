@@ -34,7 +34,7 @@ DEFAULT_VERTEX_CLAUDE_MODELS = "claude-opus-4-6"
 DEFAULT_ANTHROPIC_MODELS = "claude-sonnet-5,claude-opus-5"
 DEFAULT_OPENAI_MODELS = "gpt-5.4-nano,gpt-5.6-luna,gpt-5.6-sol"
 
-BOTS = ("parity", "random")
+BOTS = ("parity", "random", "occupancy")
 KIND_ALIASES = {
     "gemini": "gemini",
     "flash-lite": "gemini",

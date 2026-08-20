@@ -3,7 +3,7 @@ from __future__ import annotations
 import queue
 import random
 
-from salvo.agents.bots import ParityBot, RandomBot
+from salvo.agents.bots import OccupancyBot, ParityBot, RandomBot
 from salvo.agents.catalog import is_llm_name, ollama_model, parse_slot
 from salvo.agents.human import HumanPlayer
 from salvo.agents.player import LlmPlayer
@@ -25,11 +25,16 @@ def make_player(
     side: str = "left",
     inbox: queue.Queue[str | None] | None = None,
     stop: object | None = None,
-) -> ParityBot | RandomBot | LlmPlayer | HumanPlayer:
+) -> OccupancyBot | ParityBot | RandomBot | LlmPlayer | HumanPlayer:
     if name == "parity":
         return ParityBot(
             rng,
             PlayerMeta(name="methodical", kind="bot", model="parity", persona="methodical"),
+        )
+    if name == "occupancy":
+        return OccupancyBot(
+            rng,
+            PlayerMeta(name="occupancy", kind="bot", model="occupancy", persona="methodical"),
         )
     if name == "random":
         return RandomBot(rng, PlayerMeta(name="random", kind="bot", model="random"))

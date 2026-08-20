@@ -220,6 +220,10 @@ def _all_poses(length: int) -> list[tuple[Cell, ...]]:
     return poses
 
 
+def all_poses(length: int) -> list[tuple[Cell, ...]]:
+    return _all_poses(length)
+
+
 def _is_straight(cells: Sequence[Cell]) -> bool:
     if len(cells) <= 1:
         return True
