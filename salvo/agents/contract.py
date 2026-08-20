@@ -46,8 +46,8 @@ def parse_action(payload: dict[str, object] | str) -> Action:
 
 
 def _parse_belief(raw: object) -> list[Belief]:
-    if not isinstance(raw, list) or len(raw) != 3:
-        raise ContractError("belief must have exactly 3 entries")
+    if not isinstance(raw, list) or not (1 <= len(raw) <= 3):
+        raise ContractError("belief must have 1 to 3 entries")
     out: list[Belief] = []
     prev = 2.0
     for item in raw:

@@ -82,7 +82,8 @@ The setup overlay is provider-first. Pick left/right, persona, speech, seed, the
 |---|---|
 | **LLM vs LLM** | Both fleets visible. Omniscient spectator show. |
 | **Human vs AI** | You place **your** board only. The AI fleet is fogged until a ship is sunk (or match end). Click the opponent board to fire. |
-| **Human vs human** | Two browsers, one 4-character room. Pick Human on one side first (host), then Human on the other — a guest URL appears. Both fleets default to manual. Each player places and sees only their own ships until sink / end. |
+
+**Human vs human** is a different game: there is no omniscient spectator, just fog of war. Two browsers, one 4-character room. Pick Human on one side first (host), then Human on the other — a guest URL appears. Both fleets default to manual. Each player places and sees only their own ships until sink / end.
 
 Speech is orthogonal to persona: **STANDARD** (English `say`) or **PROFANE RUSSIAN (16+)** (`raw-ru`). JSON keys and cells stay `E5`; the overlay never enters the opponent’s observation. `say` is spectator-only — there is no trash-talk channel.
 
@@ -118,7 +119,7 @@ Keys stay on the server and never go to the client. Copy `.env.example` → `.en
 
 | Provider | Auth | Notes |
 |---|---|---|
-| **Vertex AI** | Application Default Credentials | Gemini + Vertex-hosted Claude (`claude-opus-4-6`). `GOOGLE_CLOUD_PROJECT` defaults to `example-project`. |
+| **Vertex AI** | Application Default Credentials | Gemini + Vertex-hosted Claude (`claude-opus-4-6`). Set `GOOGLE_CLOUD_PROJECT`. |
 | **Gemini API** | `GEMINI_API_KEY` | Google AI Studio |
 | **Anthropic** | `ANTHROPIC_API_KEY` | `claude-sonnet-5`, `claude-opus-5` |
 | **OpenAI** | `OPENAI_API_KEY` | default `gpt-5.4-nano` |

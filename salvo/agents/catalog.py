@@ -12,7 +12,6 @@ try:
 except ImportError:
     pass
 
-DEFAULT_PROJECT = "example-project"
 DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite"
 DEFAULT_CLAUDE_MODEL = "claude-opus-4-6"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-5"
@@ -68,10 +67,15 @@ _OLLAMA_ALIASES = {
 
 def project_id() -> str:
     return (
-        os.environ.get("GOOGLE_CLOUD_PROJECT")
-        or os.environ.get("GCLOUD_PROJECT")
-        or DEFAULT_PROJECT
-    )
+        os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCLOUD_PROJECT") or ""
+    ).strip()
+
+
+def require_project_id() -> str:
+    pid = project_id()
+    if not pid:
+        raise RuntimeError("GOOGLE_CLOUD_PROJECT is not set")
+    return pid
 
 
 def parse_model_list(list_env: str | None, default: str) -> list[str]:
@@ -299,7 +303,7 @@ def provider_status() -> dict[str, dict[str, Any]]:
         "vertex": {
             "ok": True,
             "label": "Vertex AI",
-            "hint": f"{project_id()} · {location}",
+            "hint": f"{project_id() or 'GOOGLE_CLOUD_PROJECT'} · {location}",
             "default": gemini_model(),
             "models": vertex_models(),
         },

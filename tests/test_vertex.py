@@ -18,6 +18,8 @@ def test_defaults_match_project_models(monkeypatch) -> None:
     monkeypatch.delenv("GCLOUD_PROJECT", raising=False)
     monkeypatch.delenv("SALVO_GEMINI_MODEL", raising=False)
     monkeypatch.delenv("SALVO_CLAUDE_MODEL", raising=False)
+    assert project_id() == ""
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "example-project")
     assert project_id() == "example-project"
     assert gemini_model() == "gemini-3.5-flash-lite"
     assert claude_model() == "claude-opus-4-6"

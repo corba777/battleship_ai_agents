@@ -106,8 +106,9 @@ Each turn the agent returns a single JSON object, no prose outside it, no fences
 ```
 
 - `shot` — required, canonical cell.
-- `belief` — required, exactly 3 entries, descending `p`, values in [0,1], need
-  not sum to 1. `belief[0].cell` SHOULD equal `shot` but is not forced; when it
+- `belief` — required, **1 to 3** entries, descending `p`, values in [0,1], need
+  not sum to 1. The example uses 3; fewer is legal. More than 3 is illegal, not
+  trimmed. `belief[0].cell` SHOULD equal `shot` but is not forced; when it
   doesn't, that's a highlight, so log the mismatch rather than correcting it.
   This field drives the heatmap and is the primary visual signal of the agent's
   model of the world diverging from reality.
@@ -259,7 +260,7 @@ uv run python -m salvo.cli --left occupancy --right random --seed 42
 uv run python -m salvo.cli replay logs/<match_id>.jsonl --pace 1.5
 
 # live LLM match (Vertex). Local: gcloud ADC. Docker: mounted JSON.
-# GOOGLE_CLOUD_PROJECT defaults to example-project.
+# GOOGLE_CLOUD_PROJECT must be set (see .env.example).
 # Gemini default: gemini-3.5-flash-lite. Claude/opus default: claude-opus-4-6.
 gcloud auth application-default login
 uv run python -m salvo.cli live --left gemini-3.5-flash --right claude-sonnet-4-6 --seed 1

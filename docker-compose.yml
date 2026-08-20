@@ -4,8 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile.server
     environment:
-      GOOGLE_CLOUD_PROJECT: example-project
-      GOOGLE_CLOUD_QUOTA_PROJECT: example-project
+      GOOGLE_CLOUD_PROJECT: ${GOOGLE_CLOUD_PROJECT:-}
+      GOOGLE_CLOUD_QUOTA_PROJECT: ${GOOGLE_CLOUD_QUOTA_PROJECT:-}
       GOOGLE_APPLICATION_CREDENTIALS: /credentials/application_default_credentials.json
       VERTEX_LOCATION: global
       SALVO_GEMINI_MODEL: gemini-3.5-flash-lite

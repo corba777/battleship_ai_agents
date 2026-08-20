@@ -8,17 +8,16 @@ from urllib.parse import quote
 from salvo.agents.catalog import (
     DEFAULT_CLAUDE_MODEL,
     DEFAULT_GEMINI_MODEL,
-    DEFAULT_PROJECT,
     claude_model,
     gemini_model,
     model_id,
     project_id,
+    require_project_id,
 )
 
 __all__ = [
     "DEFAULT_CLAUDE_MODEL",
     "DEFAULT_GEMINI_MODEL",
-    "DEFAULT_PROJECT",
     "claude_model",
     "complete",
     "gemini_model",
@@ -26,6 +25,7 @@ __all__ = [
     "is_claude_model",
     "model_id",
     "project_id",
+    "require_project_id",
     "vertex_anthropic_body",
     "vertex_anthropic_text",
     "vertex_anthropic_url",
@@ -113,7 +113,7 @@ def generate_vertex_gemini(model: str, system: str, user: str, location: str) ->
     from google import genai
     from google.genai import types
 
-    client = genai.Client(vertexai=True, project=project_id(), location=location)
+    client = genai.Client(vertexai=True, project=require_project_id(), location=location)
     response = client.models.generate_content(
         model=model,
         contents=user,
@@ -133,7 +133,7 @@ def generate_vertex_gemini(model: str, system: str, user: str, location: str) ->
 def generate_vertex_claude(model: str, system: str, user: str, location: str) -> str:
     import httpx
 
-    url = vertex_anthropic_url(project_id(), location, model)
+    url = vertex_anthropic_url(require_project_id(), location, model)
     log.info("vertex claude rawPredict %s", url)
     response = httpx.post(
         url,
