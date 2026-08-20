@@ -79,7 +79,7 @@ const FALLBACK: Catalog = {
 };
 
 const LLM_PROVIDERS: ProviderId[] = ["vertex", "anthropic", "openai", "gemini", "ollama"];
-const ADK_PROVIDERS: ProviderId[] = ["vertex", "openai", "anthropic"];
+const ADK_PROVIDERS: ProviderId[] = ["vertex", "gemini", "openai", "anthropic"];
 
 export function attachSetup(onFixture: () => void, startHidden = false): void {
   const root = document.querySelector<HTMLElement>("#setup");

@@ -45,7 +45,7 @@ KIND_ALIASES = {
     "ollama": "ollama",
 }
 PROVIDERS = ("vertex", "gemini", "anthropic", "openai", "ollama")
-ADK_PROVIDERS = ("vertex", "openai", "anthropic")
+ADK_PROVIDERS = ("vertex", "gemini", "openai", "anthropic")
 
 _GEMINI_ALIASES = {
     "gemini": DEFAULT_GEMINI_MODEL,

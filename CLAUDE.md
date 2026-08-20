@@ -30,7 +30,7 @@ salvo/              # Python package
     log.py          # JSONL match recorder
   agents/
     player.py       # LlmPlayer, one instance per side
-    adk.py          # Optional Plan-ReAct for Vertex, OpenAI, Anthropic API. No tools. Not Ollama.
+    adk.py          # Optional Plan-ReAct for Vertex, Gemini API, OpenAI, Anthropic API. Not Ollama.
     human.py        # click-driven player; same act() contract
     contract.py     # output schema + parsing + repair policy
     prompts/        # system prompts, one file per persona
@@ -152,20 +152,21 @@ may use the same persona.
 
 Setup is provider-first. **Vertex AI** lists Gemini plus Vertex-hosted Claude
 (`claude-opus-4-6`). Default runtime is **direct**. Per slot, **ADK** is
-optional for Vertex, OpenAI, and Anthropic API: setup overlay DIRECT | ADK,
-live query `adk_left` / `adk_right` (`1` or `0`), CLI `--adk-left` /
-`--no-adk-left`, or env `SALVO_ADK=1` when the slot does not set a flag. ADK
-is a one-shot `LlmAgent` with Plan-ReAct and **no tools** — the referee still
-owns the turn, parse, and repair. Planning tags never enter the opponent
-observation; only `/*FINAL_ANSWER*/` JSON is parsed. Anthropic API uses
-`AnthropicLlm` (not a bare `claude-*` string, which ADK would send to Vertex).
-OpenAI uses `OpenAILlm`. **Ollama and Gemini API stay direct.** **Anthropic**
-list (`claude-sonnet-5`, `claude-opus-5`) needs `ANTHROPIC_API_KEY`. **OpenAI**
-defaults to `gpt-5.4-nano` (`OPENAI_API_KEY`). **Gemini API** is Google AI
-Studio (`GEMINI_API_KEY`). **Ollama** is local (`OLLAMA_URL`, default
-`http://localhost:11434`); same `/api/chat` body as amber (`format: json`,
-`think: false`). `OLLAMA_THINK=1` turns CoT on. `GET /catalog` is the menu
-source. Keys never go to the client.
+optional for Vertex, Gemini API, OpenAI, and Anthropic API: setup overlay
+DIRECT | ADK, live query `adk_left` / `adk_right` (`1` or `0`), CLI
+`--adk-left` / `--no-adk-left`, or env `SALVO_ADK=1` when the slot does not
+set a flag. ADK is a one-shot `LlmAgent` with Plan-ReAct and **no tools** —
+the referee still owns the turn, parse, and repair. Planning tags never enter
+the opponent observation; only `/*FINAL_ANSWER*/` JSON is parsed. Gemini API
+forces `GOOGLE_GENAI_USE_VERTEXAI=FALSE` so a leftover Vertex env cannot
+steal the call. Anthropic API uses `AnthropicLlm` (not a bare `claude-*`
+string, which ADK would send to Vertex). OpenAI uses `OpenAILlm`. **Ollama
+stays direct.** **Anthropic** list (`claude-sonnet-5`, `claude-opus-5`) needs
+`ANTHROPIC_API_KEY`. **OpenAI** defaults to `gpt-5.4-nano` (`OPENAI_API_KEY`).
+**Gemini API** is Google AI Studio (`GEMINI_API_KEY`). **Ollama** is local
+(`OLLAMA_URL`, default `http://localhost:11434`); same `/api/chat` body as
+amber (`format: json`, `think: false`). `OLLAMA_THINK=1` turns CoT on.
+`GET /catalog` is the menu source. Keys never go to the client.
 
 ## Event stream
 

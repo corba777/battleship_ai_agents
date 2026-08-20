@@ -120,7 +120,7 @@ Keys stay on the server and never go to the client. Copy `.env.example` → `.en
 | Provider | Auth | Notes |
 |---|---|---|
 | **Vertex AI** | Application Default Credentials | Gemini + Vertex-hosted Claude (`claude-opus-4-6`). Direct by default; optional ADK Plan-ReAct per side (`adk_left=1`). Set `GOOGLE_CLOUD_PROJECT`. |
-| **Gemini API** | `GEMINI_API_KEY` | Google AI Studio. Direct only. |
+| **Gemini API** | `GEMINI_API_KEY` | Google AI Studio. Direct or ADK (same Gemini class, API key, not Vertex). |
 | **Anthropic** | `ANTHROPIC_API_KEY` | `claude-sonnet-5`, `claude-opus-5`. Direct or ADK (`AnthropicLlm`). |
 | **OpenAI** | `OPENAI_API_KEY` | default `gpt-5.4-nano`. Direct or ADK (`OpenAILlm`). |
 | **Ollama** | `OLLAMA_URL` (default `http://localhost:11434`) | Direct only. `format: json`, `think: false`. `OLLAMA_THINK=1` turns CoT on. |

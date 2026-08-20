@@ -84,7 +84,7 @@ async def _complete_async(
     )
     sessions = InMemorySessionService()
     session_id = uuid4().hex
-    env = _vertex_env(location) if provider == "vertex" else nullcontext()
+    env = _provider_env(provider, location)
     with env:
         await sessions.create_session(
             app_name=APP_NAME, user_id="player", session_id=session_id
@@ -167,6 +167,38 @@ def _ensure_claude_registered(model: str) -> None:
 
     LLMRegistry.register(Claude)
     _claude_registered = True
+
+
+def _provider_env(provider: str, location: str):
+    if provider == "vertex":
+        return _vertex_env(location)
+    if provider == "gemini":
+        return _gemini_api_env()
+    return nullcontext()
+
+
+@contextmanager
+def _gemini_api_env() -> Iterator[None]:
+    from salvo.agents.catalog import gemini_api_key
+
+    key = gemini_api_key()
+    if not key:
+        raise RuntimeError("GEMINI_API_KEY / GOOGLE_API_KEY is not set")
+    updates = {
+        "GOOGLE_GENAI_USE_VERTEXAI": "FALSE",
+        "GOOGLE_API_KEY": key,
+        "GEMINI_API_KEY": key,
+    }
+    previous = {key_name: os.environ.get(key_name) for key_name in updates}
+    os.environ.update(updates)
+    try:
+        yield
+    finally:
+        for key_name, value in previous.items():
+            if value is None:
+                os.environ.pop(key_name, None)
+            else:
+                os.environ[key_name] = value
 
 
 @contextmanager

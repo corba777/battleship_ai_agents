@@ -81,13 +81,13 @@ def _add_match_flags(parser: argparse.ArgumentParser) -> None:
         "--adk-left",
         action=argparse.BooleanOptionalAction,
         default=None,
-        help="Vertex, OpenAI, Anthropic API. Plan-ReAct via ADK. Not Ollama or Gemini API. Default: SALVO_ADK env, else direct.",
+        help="Vertex, Gemini API, OpenAI, Anthropic API. Plan-ReAct via ADK. Not Ollama. Default: SALVO_ADK env, else direct.",
     )
     parser.add_argument(
         "--adk-right",
         action=argparse.BooleanOptionalAction,
         default=None,
-        help="Vertex, OpenAI, Anthropic API. Plan-ReAct via ADK. Not Ollama or Gemini API. Default: SALVO_ADK env, else direct.",
+        help="Vertex, Gemini API, OpenAI, Anthropic API. Plan-ReAct via ADK. Not Ollama. Default: SALVO_ADK env, else direct.",
     )
 
 

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import os
 
+import pytest
+
 from salvo.agents.adk import extract_contract_text
 from salvo.agents.factory import make_player
 from salvo.agents.vertex import generate, is_claude_model, project_id, vertex_location
@@ -59,7 +61,7 @@ def test_player_adk_is_opt_in(monkeypatch) -> None:
     assert wrapped.adk is True
     assert wrapped.meta.as_dict()["adk"] is True
     api = make_player("gemini", random.Random(0), side="left", provider="gemini", adk=True)
-    assert api.adk is False
+    assert api.adk is True
     openai = make_player("gpt-5.4-nano", random.Random(0), side="left", adk=True)
     assert openai.adk is True
     anthropic = make_player(
@@ -128,6 +130,7 @@ def test_adk_model_uses_api_classes_not_vertex_claude() -> None:
     assert isinstance(anthropic, AnthropicLlm)
     assert not isinstance(anthropic, Claude)
     assert adk_model("gemini-3.5-flash-lite", "vertex") == "gemini-3.5-flash-lite"
+    assert adk_model("gemini-3.5-flash-lite", "gemini") == "gemini-3.5-flash-lite"
 
 
 def test_adk_registry_routes_vertex_claude() -> None:
@@ -168,3 +171,59 @@ def test_vertex_env_sets_adk_location(monkeypatch) -> None:
         assert os.environ["GOOGLE_GENAI_USE_VERTEXAI"] == "TRUE"
         assert os.environ["GOOGLE_CLOUD_PROJECT"] == "example-project"
     assert "GOOGLE_CLOUD_LOCATION" not in os.environ
+
+
+def test_gemini_api_env_forces_non_vertex(monkeypatch) -> None:
+    from salvo.agents.adk import _gemini_api_env
+
+    monkeypatch.setenv("GOOGLE_GENAI_USE_VERTEXAI", "true")
+    monkeypatch.setenv("GEMINI_API_KEY", "studio-key")
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    with _gemini_api_env():
+        assert os.environ["GOOGLE_GENAI_USE_VERTEXAI"] == "FALSE"
+        assert os.environ["GOOGLE_API_KEY"] == "studio-key"
+        assert os.environ["GEMINI_API_KEY"] == "studio-key"
+    assert os.environ["GOOGLE_GENAI_USE_VERTEXAI"] == "true"
+    assert "GOOGLE_API_KEY" not in os.environ
+
+
+def test_gemini_api_env_requires_key(monkeypatch) -> None:
+    from salvo.agents.adk import _gemini_api_env
+
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="GEMINI_API_KEY"):
+        with _gemini_api_env():
+            pass
+
+
+def test_gemini_api_adk_routes_to_adk_complete(monkeypatch) -> None:
+    seen: dict[str, str] = {}
+
+    def fake(
+        model: str,
+        system: str,
+        user: str,
+        location: str = "global",
+        *,
+        provider: str = "vertex",
+    ) -> str:
+        seen["model"] = model
+        seen["provider"] = provider
+        seen["location"] = location
+        return '{"shot":"E5","belief":[{"cell":"E5","p":0.9}],"say":"Opening."}'
+
+    monkeypatch.setattr("salvo.agents.adk.complete", fake)
+    from salvo.agents.providers import complete
+
+    text = complete(
+        "gemini",
+        "sys",
+        "usr",
+        model="gemini-3.5-flash-lite",
+        provider="gemini",
+        adk=True,
+    )
+    assert seen["provider"] == "gemini"
+    assert seen["model"] == "gemini-3.5-flash-lite"
+    assert "shot" in text
