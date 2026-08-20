@@ -8,6 +8,7 @@ export interface HudHandles {
   hitrate: HTMLElement;
   repeats: HTMLElement;
   illegals: HTMLElement;
+  schema: HTMLElement;
   illegal: HTMLElement;
   banner: HTMLElement;
 }
@@ -21,7 +22,7 @@ interface SidePanel {
   tags: HTMLElement;
 }
 
-const emptyStats = () => ({ shots: 0, hits: 0, repeats: 0, illegals: 0 });
+const emptyStats = () => ({ shots: 0, hits: 0, repeats: 0, illegals: 0, schema: 0 });
 
 export class Hud {
   private readonly el: HudHandles;
@@ -37,6 +38,7 @@ export class Hud {
       hitrate: must("#c-hitrate"),
       repeats: must("#c-repeats"),
       illegals: must("#c-illegals"),
+      schema: must("#c-schema"),
       illegal: must("#illegal"),
       banner: must("#banner"),
     };
@@ -89,9 +91,13 @@ export class Hud {
   }
 
   illegal(event: Extract<MatchEvent, { type: "illegal" }>): void {
-    this.stats[event.side].illegals += 1;
+    const kind = event.kind === "schema" ? "schema" : "rules";
+    if (kind === "schema") this.stats[event.side].schema += 1;
+    else this.stats[event.side].illegals += 1;
     this.el.illegal.hidden = false;
-    this.el.illegal.textContent = `${event.side} illegal #${event.attempt}: ${event.reason}\n${event.raw}`;
+    this.el.illegal.classList.toggle("is-schema", kind === "schema");
+    const label = kind === "schema" ? "schema" : "illegal";
+    this.el.illegal.textContent = `${event.side} ${label} #${event.attempt}: ${event.reason}\n${event.raw}`;
     this.toastTimer = performance.now() + 4200;
     this.paintCounters();
   }
@@ -127,9 +133,11 @@ export class Hud {
     const hits = this.stats.left.hits + this.stats.right.hits;
     const repeats = this.stats.left.repeats + this.stats.right.repeats;
     const illegals = this.stats.left.illegals + this.stats.right.illegals;
+    const schema = this.stats.left.schema + this.stats.right.schema;
     this.el.shots.textContent = String(shots);
     this.el.repeats.textContent = String(repeats);
     this.el.illegals.textContent = String(illegals);
+    this.el.schema.textContent = String(schema);
     this.el.hitrate.textContent = shots === 0 ? "—" : `${Math.round((hits / shots) * 100)}%`;
   }
 }

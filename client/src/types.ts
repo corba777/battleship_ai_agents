@@ -23,12 +23,15 @@ export interface Belief {
   p: number;
 }
 
+export type IllegalKind = "rules" | "schema";
+
 export interface SideStats {
   shots: number;
   hits: number;
   misses: number;
   repeats: number;
   illegals: number;
+  schema?: number;
   coerced: number;
 }
 
@@ -72,6 +75,7 @@ export interface Illegal {
   side: Side;
   raw: string;
   reason: string;
+  kind?: IllegalKind;
   attempt: number;
 }
 

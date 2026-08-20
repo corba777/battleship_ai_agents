@@ -41,6 +41,7 @@ class SideStats:
     misses: int = 0
     repeats: int = 0
     illegals: int = 0
+    schema: int = 0
     coerced: int = 0
 
     def as_dict(self) -> dict[str, int]:
@@ -128,6 +129,7 @@ class Illegal:
     raw: str
     reason: str
     attempt: int
+    kind: Literal["rules", "schema"] = "rules"
     type: Literal["illegal"] = "illegal"
 
     def as_dict(self) -> dict[str, Any]:
@@ -136,6 +138,7 @@ class Illegal:
             "side": self.side,
             "raw": self.raw,
             "reason": self.reason,
+            "kind": self.kind,
             "attempt": self.attempt,
         }
 

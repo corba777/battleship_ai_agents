@@ -173,7 +173,7 @@ body {
   right: 22px;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(4, auto);
+  grid-template-columns: repeat(5, auto);
   gap: 18px;
   font-family: "IBM Plex Mono", monospace;
   padding: 10px 14px;
@@ -202,6 +202,17 @@ body {
   color: var(--ink);
 }
 
+.counters li.is-quiet .k {
+  font-size: 9px;
+  color: var(--dim);
+}
+
+.counters li.is-quiet .v {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
 .toast,
 .banner {
   position: absolute;
@@ -219,6 +230,11 @@ body {
   top: 56px;
   color: var(--warn);
   white-space: pre-wrap;
+}
+
+.toast.is-schema {
+  font-size: 10px;
+  color: var(--muted);
 }
 
 .banner {

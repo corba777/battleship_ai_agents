@@ -94,7 +94,10 @@ def play_match(
             yield MatchAbort(turns=turn_index, stats=stats)
             return
         for event in illegal_events:
-            stats[side].illegals += 1
+            if event.kind == "schema":
+                stats[side].schema += 1
+            else:
+                stats[side].illegals += 1
             yield event
         if coerced:
             stats[side].coerced += 1
@@ -142,6 +145,7 @@ def _take_action(
                     side=obs.side,
                     raw=_raw_text(raw),
                     reason=error,
+                    kind=exc.kind,
                     attempt=attempt,
                 )
             )

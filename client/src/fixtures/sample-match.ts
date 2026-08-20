@@ -21,7 +21,7 @@ interface ScriptShot {
   cell?: string;
   say?: string;
   belief?: Belief[];
-  illegal?: { raw: string; reason: string; attempt: number };
+  illegal?: { raw: string; reason: string; attempt: number; kind?: "rules" | "schema" };
   coerced?: boolean;
 }
 
@@ -152,7 +152,7 @@ export function sampleMatch(): MatchEvent[] {
     },
     {
       side: "left",
-      illegal: { raw: "5E", reason: "transposed coordinate", attempt: 1 },
+      illegal: { raw: "5E", reason: "transposed coordinate", attempt: 1, kind: "rules" },
     },
     {
       side: "left",
@@ -176,7 +176,16 @@ export function sampleMatch(): MatchEvent[] {
     },
     {
       side: "left",
-      illegal: { raw: "fire the middle somewhere", reason: "unparseable", attempt: 2 },
+      illegal: {
+        raw: '{"shot":"D2","belief":[{"cell":"D2","p":0.9},{"cell":"D3","p":0.4},{"cell":"C2","p":0.2},{"cell":"E2","p":0.1}],"say":"D2 is the cell."}',
+        reason: "belief must have 1 to 3 entries",
+        attempt: 1,
+        kind: "schema",
+      },
+    },
+    {
+      side: "left",
+      illegal: { raw: "fire the middle somewhere", reason: "unparseable", attempt: 2, kind: "rules" },
     },
     {
       side: "left",
@@ -245,6 +254,7 @@ export function sampleMatch(): MatchEvent[] {
         side: step.side,
         raw: step.illegal.raw,
         reason: step.illegal.reason,
+        kind: step.illegal.kind ?? "rules",
         attempt: step.illegal.attempt,
       });
       continue;
@@ -286,8 +296,8 @@ export function sampleMatch(): MatchEvent[] {
     winner: "right",
     turns: turnIndex,
     stats: {
-      left: { shots: 0, hits: 0, misses: 0, repeats: 0, illegals: 0, coerced: 0 },
-      right: { shots: 0, hits: 0, misses: 0, repeats: 0, illegals: 0, coerced: 0 },
+      left: { shots: 0, hits: 0, misses: 0, repeats: 0, illegals: 0, schema: 0, coerced: 0 },
+      right: { shots: 0, hits: 0, misses: 0, repeats: 0, illegals: 0, schema: 0, coerced: 0 },
     },
   });
   return events;

@@ -22,25 +22,25 @@ deterministic bot exists here only as a token-free dev fixture (see Testing).
 ## Architecture
 
 ```
-salvo/
-  referee/          # Python. Sole owner of game truth.
+salvo/              # Python package
+  referee/          # Sole owner of game truth.
     board.py        # placement, shot resolution, sink detection
     match.py        # turn loop, match state machine
     events.py       # event dataclasses -> JSON
     log.py          # JSONL match recorder
-  agents/           # Python. ADK orchestration.
+  agents/           # ADK orchestration.
     player.py       # LlmAgent wrapper, one instance per side
     human.py        # click-driven player; same act() contract
     contract.py     # output schema + parsing + repair policy
     prompts/        # system prompts, one file per persona
   server/
     app.py          # FastAPI, WebSocket event stream, replay endpoint
-  client/           # TypeScript + Vite + Three.js. Thin.
-    src/scene/      # boards, pegs, ships, camera rigs, water
-    src/hud/        # reasoning panel, belief heatmap, counters
-    src/place/      # director fleet overlay (UX port of board.py)
-    src/net/        # WS subscribe, event -> scene mutation
-  logs/             # match JSONL, gitignored
+client/             # TypeScript + Vite + Three.js. Thin. Sibling of salvo/, not inside it.
+  src/scene/        # boards, pegs, ships, camera rigs, water
+  src/hud/          # reasoning panel, belief heatmap, counters
+  src/place/        # director fleet overlay (UX port of board.py)
+  src/net/          # WS subscribe, event -> scene mutation
+logs/               # match JSONL, gitignored
 ```
 
 ### The boundary that matters
@@ -66,11 +66,13 @@ position, animation queues, which panel is expanded.
    (`test_no_leak.py`) that asserts the rendered prompt for side A contains no
    coordinate from side B's placement. Keep it passing. This is the whole show —
    if it breaks, the drama is fake and nothing else matters.
-2. **Never silently repair agent output.** Illegal shots are the best material in
+2. **Never silently repair agent output.** Illegal output is the best material in
    the project. Log every one with the raw text. Policy: on illegal or
    unparseable output, re-prompt once with an explicit error message; on second
    failure, the referee picks a uniform random legal cell and marks the turn
-   `coerced: true`. Coerced turns render differently in the HUD.
+   `coerced: true`. Coerced turns render differently in the HUD. Repair is the
+   same for `kind: rules` and `kind: schema`; only the HUD and the counters
+   split them. Do not trim `belief` to make a turn legal.
 3. **Repeat shots are legal and are not errors.** Firing at an already-resolved
    cell wastes the turn, increments `repeat_count`, and is rendered with a
    distinct sound and a shake. Do not block it, do not warn the agent
@@ -108,10 +110,12 @@ Each turn the agent returns a single JSON object, no prose outside it, no fences
 - `shot` — required, canonical cell.
 - `belief` — required, **1 to 3** entries, descending `p`, values in [0,1], need
   not sum to 1. The example uses 3; fewer is legal. More than 3 is illegal, not
-  trimmed. `belief[0].cell` SHOULD equal `shot` but is not forced; when it
-  doesn't, that's a highlight, so log the mismatch rather than correcting it.
-  This field drives the heatmap and is the primary visual signal of the agent's
-  model of the world diverging from reality.
+  trimmed — that is `kind: schema`, not a rules break. A legal `shot` with four
+  belief rows still fails the contract and does not fire. `belief[0].cell`
+  SHOULD equal `shot` but is not forced; when it doesn't, that's a highlight, so
+  log the mismatch rather than correcting it. This field drives the heatmap and
+  is the primary visual signal of the agent's model of the world diverging from
+  reality.
 - `say` — required, one or two sentences, first person, present tense.
 
 ### Speech profiles
@@ -165,7 +169,7 @@ Server → client over WebSocket, one JSON object per message, `type` discrimina
 | `thinking` | side, `say`, `belief` |
 | `shot_result` | side, cell, `hit` \| `miss` \| `repeat`, `coerced` |
 | `sunk` | side, ship name, cells |
-| `illegal` | side, raw output, reason, attempt number |
+| `illegal` | side, raw output, reason, `kind`: `rules` \| `schema`, attempt number |
 | `match_abort` | turns, reason (`stopped`), stats so far. No winner. |
 | `match_end` | winner, turn count, final stats |
 
@@ -178,6 +182,8 @@ Client → server (live `/ws` only):
 | `abort` | stop the match; partial JSONL is still written |
 
 `placement_error` is a control message, not a match event: illegal fleets are rejected and the overlay stays up.
+
+`illegal.kind` is the split the HUD needs. `rules` is the game: shot off the board, transposition `5E`, unparseable JSON. Count it in `illegals`, toast it large. `schema` is the parser: extra `belief` row, missing `say`, a field that slid. Count it in `schema`, toast it small. Raw output is in the banner for both. Old logs without `kind` are `rules`. Do not collapse them back into one counter.
 
 Human vs human rooms (`/ws?room=&seat=`) add three more control messages: `room_hello` (your seat), `room_peer` (the other seat joined), `room_waiting` (you placed; the other seat has not). Each seat's `start` carries **only that seat's** fleet.
 
@@ -214,8 +220,8 @@ Each player places **their** board only. Match starts when both have sent `start
 - Camera rigs: `idle` (slow orbit), `focus` (push in on the active cell),
   `finale` (slow flyover triggered on the final `sunk`). Rigs are driven by
   events, never by a timer that assumes turn duration.
-- Counters in the corner: repeats, illegals, shots fired, hit rate. Small, always
-  visible, no animation.
+- Counters in the corner: repeats, illegals (`rules`), schema, shots fired, hit
+  rate. Schema is the small type next to illegals. Always visible, no animation.
 - Water shader is the last thing you build, and it is allowed to be indulgent
   once everything above works.
 
@@ -283,7 +289,8 @@ docker compose up --build
 
 - Skill measurement of any kind. A fifty-line heuristic beats every LLM here and
   everyone already knows it.
-- Salvo/advanced rule variants, fog-of-war fleets, custom board sizes.
+- Salvo/advanced rule variants, custom board sizes. Fog in LLM vs LLM — never.
+  Human vs AI and rooms already fog the other fleet until sunk / match end.
 - Agents holding their own boards and self-reporting hits (a commit-reveal honesty
   variant). Interesting, genuinely — and a different repo with different goals.
   Referee-authoritative here, always.
